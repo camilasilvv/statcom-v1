@@ -1,4 +1,6 @@
 from tkinter import *
+import satellite
+from tkinter.filedialog import askopenfilename
 
 class NewSatellitePage:
     def __init__(self, master):
@@ -6,6 +8,7 @@ class NewSatellitePage:
         # window creation
         self.master = master
         self.master.title("new satellite")
+        self.frame=Frame(master)
 
 
         # create de widget for the satellite name
@@ -14,28 +17,30 @@ class NewSatellitePage:
 
         # create variable for the up link entries
         self.uplinkBand = StringVar()
-        self.upFreq = DoubleVar()
+
         # create widget for the up link transmission
         self.upVHF = Radiobutton(self.master, text="VHF", variable = self.uplinkBand, value = 1)
         self.upUHF = Radiobutton(self.master, text="UHF", variable = self.uplinkBand, value = 2)
         # TODO : add all variables to the entries
-        self.upFreqBox = Entry(self.master)
+        self.upFreqBox = Spinbox(self.master, from_= 0, to= 600)
 
         self.labelUpLink = Label(self.master, text="uplink")
 
         # create variable for the down link entries
         self.downlinkBand = StringVar()
-        self.downFreq = DoubleVar()
 
         # create widget for the down link transmission
         self.downVHF = Radiobutton(self.master, text="VHF", variable = self.downlinkBand, value = 1)
         self.downUHF = Radiobutton(self.master, text="UHF", variable = self.downlinkBand, value = 2)
-        self.downFreqBox = Entry(self.master)
+        self.downFreqBox = Spinbox(self.master, from_= 0, to= 600)
 
         self.labelDownLink = Label(self.master, text="downlink")
 
         #create the save button widget
-        self.saveBtn = Button(self.master,text="save")
+        self.saveBtn = Button(self.master,text="save",command=self.save)
+        #create a error box
+        self.errortext=StringVar()
+        self.error=Label(self.master,textvariable=self.errortext)
         # TODO : connect the save button to a function that will save the satellite in the database
 
         #creates the owner name box and modulation box
@@ -60,14 +65,33 @@ class NewSatellitePage:
         self.labelModulation.grid(row=6, column= 0)
         self.boxModulation.grid(row=6, column=1)
 
-
-        self.saveBtn.grid(row=7, column=6)
+        self.error.grid(row=7, column=1)
+        self.saveBtn.grid(row=8, column=6)
         self.labelName.grid(row=0, column=0)
         self.nameBox.grid(row=0, column=1)
 
 
         
         # TODO : define a save function
+    def save(self):
+        name=self.nameBox.get()
+        upFreq=self.upFreqBox.get()
+        downFreq=self.downFreqBox.get()
+        owner=self.boxOwner.get()
+        modulation=self.boxModulation.get()
+
+        #verify if all the information is here
+        if name=="" or upFreq==0 or downFreq==0 or owner=="" or modulation=="":
+
+            self.errortext.set("all fields must be filled!")
+
+        else:
+            sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
+                                      owner=owner, modulation=modulation)
+            sat.saveInDB()
+
+
+
 
 class NewReservationPage():
     def __init__(self, master):
@@ -81,14 +105,27 @@ class NewReservationPage():
         self.labelSatName = Label(self.master, text= "Satellite name")
         self.boxSatellite= Entry(self.master)
         self.btnSearch= Button(self.master, text="search")
+
+        self.btnBrowser= Button(self.master, text="browse", command=self.OpenFile)
+
+
         # TODO: connect this button to a function that will search the satellite in the database and print the next passages
+
 
         # place the widget in the frame
         self.labelTitle.grid(row=0, column =1)
         self. labelNext.grid(row=2,column=1)
         self.labelSatName.grid(row=1, column=0)
-        self.boxSatellite.grid(row=1, column=1)
+        self.boxSatellite.grid(row=1, column=1)cd
         self.btnSearch.grid(row=1, column=2)
+        self.btnBrowser.grid(row=3,column=1)
+
+    def OpenFile(self):
+         name = askopenfilename(initialdir="../../../Documents",
+                                filetypes =(("Text File", "*.txt"), ("All Files", "*.*")),
+                                title="Choose a file."
+                                )
+        name="3"
 
 class GetDataPage():
     def __init__(self, master):
@@ -112,6 +149,21 @@ class GetDataPage():
         self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
 
+class ManageSatellite:
+    def __init__(self, master):
+        self.master=master
+        self.master.title("Satellite manager")
+
+class ManageReservation:
+    def __init__(self, master):
+        self.master=master
+        self.master.title("Reservation manager")
+
+class ManageData:
+    def __init__(self, master):
+        self.master=master
+        self.master.title("Data manager")
+
 class mainWindow:
     def __init__(self, master):
         self.master = master
@@ -130,16 +182,15 @@ class mainWindow:
         self.menu1.add_command(label="exit")
 
         self.menubar.add_cascade(label="File",menu=self.menu1)
-        self.menu2.add_command(label="manage satellite")
-        self.menu2.add_command(label="manage reservation")
-        self.menu2.add_command(label="manage data")
+        self.menu2.add_command(label="manage satellite",command=self.openManageSatellite)
+        self.menu2.add_command(label="manage reservation", command=self.openManageReservation)
+        self.menu2.add_command(label="manage data", command=self.openManageData)
         self.menubar.add_cascade(label="Edit", menu=self.menu2)
 
         self.menubar.add_command(label="help")
         
         self.master.config(menu=self.menubar)
         self.master.mainloop()
-
 
 
     def openNewSatellite(self):
@@ -154,6 +205,18 @@ class mainWindow:
         root2 = Toplevel(self.master)
         getDataPage = GetDataPage(root2)
 
+
+    def openManageSatellite(self):
+         root2= Toplevel(self.master)
+         newSatellitepage=ManageSatellite(root2)
+
+    def openManageReservation(self):
+         root2= Toplevel(self.master)
+         newSatellitePage=ManageReservation(root2)
+
+    def openManageData(self):
+        root2 = Toplevel(self.master)
+        getDataPage = ManageData(root2)
 
 
 def main():
