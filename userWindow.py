@@ -1,6 +1,7 @@
 from tkinter import *
 import satellite
 from tkinter.filedialog import askopenfilename
+import json
 
 class NewSatellitePage:
     def __init__(self, master):
@@ -116,7 +117,7 @@ class NewReservationPage():
         self.labelTitle.grid(row=0, column =1)
         self. labelNext.grid(row=2,column=1)
         self.labelSatName.grid(row=1, column=0)
-        self.boxSatellite.grid(row=1, column=1)cd
+        self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
         self.btnBrowser.grid(row=3,column=1)
 
@@ -125,7 +126,7 @@ class NewReservationPage():
                                 filetypes =(("Text File", "*.txt"), ("All Files", "*.*")),
                                 title="Choose a file."
                                 )
-        name="3"
+
 
 class GetDataPage():
     def __init__(self, master):
@@ -150,9 +151,17 @@ class GetDataPage():
         self.btnSearch.grid(row=1, column=2)
 
 class ManageSatellite:
+
     def __init__(self, master):
+
         self.master=master
         self.master.title("Satellite manager")
+        self.printSatellite()
+
+    def printSatellite(self):
+        jsonFile=open("./satelliteDB.json")
+        allSatellites=json.load(jsonFile)
+        print(allSatellites["name"])
 
 class ManageReservation:
     def __init__(self, master):

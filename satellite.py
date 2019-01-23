@@ -11,6 +11,10 @@ class Satellite():
         self.owner=owner
         self.modulation=modulation
     def saveInDB(self):
+        previousJson=open("./satelliteDB.json")
+        satelliteList= json.load(previousJson)
+        print(type(satelliteList))
+
         dict = {
             'name':self.name,
             'upFreq':self.upFreq,
@@ -22,12 +26,12 @@ class Satellite():
         }
         jsonDB=json.dumps(dict)
 
-        with open('satelliteDB.json','w') as satDB:
+        with open('satelliteDB.json', 'w') as satDB:
             satDB.write(jsonDB)
 
-        shutil.move("satelliteDB.json","/home/simon/Documents/satelliteDB.json")
+        #shutil.move("satelliteDB.json","/home/simon/Documents/satelliteDB.json")
 
 
 
-s= Satellite(name= "test",upFreq=440,downFreq=144,upBand="UHF",downBand="VHF",owner="statcom",modulation="FSK")
-s.saveInDB()
+#s= Satellite(name= "test",upFreq=440,downFreq=144,upBand="UHF",downBand="VHF",owner="statcom",modulation="FSK")
+#s.saveInDB()
