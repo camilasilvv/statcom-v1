@@ -1,5 +1,6 @@
 import json
 import shutil
+import os
 
 class Satellite():
     def __init__(self, name, upFreq, downFreq, upBand, downBand, owner, modulation):
@@ -10,9 +11,13 @@ class Satellite():
         self.downBand=downBand
         self.owner=owner
         self.modulation=modulation
+
     def saveInDB(self):
         previousJson=open("./satelliteDB.json")
-        satelliteList= json.load(previousJson)
+        if os.stat("./satelliteDB.json").st_size==0:
+            satelliteList=[]
+        else:
+            satelliteList=json.load(previousJson)
         print(type(satelliteList))
 
         dict = {
@@ -24,14 +29,22 @@ class Satellite():
             'owner':self.owner,
             'modulation':self.modulation
         }
-        jsonDB=json.dumps(dict)
+
+        satelliteList.append(dict)
+        jsonDB=json.dumps(satelliteList)
+
 
         with open('satelliteDB.json', 'w') as satDB:
             satDB.write(jsonDB)
 
-        #shutil.move("satelliteDB.json","/home/simon/Documents/satelliteDB.json")
+    def dictToSatellite(self, dict):
+
+        self.name = dict['name']
+        self.upFreq = dict['upFreq']
+        self.downFreq = dict['downFreq']
+        self.upBand = dict['upBand']
+        self.downBand = dict['downBand']
+        self.owner = dict['owner']
+        self.modulation = dict['modulation']
 
 
-
-#s= Satellite(name= "test",upFreq=440,downFreq=144,upBand="UHF",downBand="VHF",owner="statcom",modulation="FSK")
-#s.saveInDB()
