@@ -7,8 +7,8 @@ class Reservation:
         self.date=date
         self.client=client
 
-     def saveInDB(self):
-         previousJson = open("./reservationDB.json")
+    def saveInDB(self):
+        previousJson = open("./reservationDB.json")
         if os.stat("./satelliteDB.json").st_size == 0:
             reservationList = []
         else:

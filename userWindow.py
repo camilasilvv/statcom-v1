@@ -157,7 +157,7 @@ class GetDataPage():
     def __init__(self, master):
         # window creation
         self.master = master
-        self.master.title("new reservation")
+        self.master.title("Get data")
 
         # create the widget for the search bar
         self.labelTitle = Label(self.master, text="Get Data")
@@ -200,10 +200,34 @@ class ManageReservation:
         self.master=master
         self.master.title("Reservation manager")
 
+        self.listReservation = Listbox(self.master,width=60)
+        self.listReservation.grid(column=0, row=0)
+        self.deleteBtn = Button(self.master, text='delete')
+        self.deleteBtn.grid(column=0, row=1)
+        self.printReservation()
+
+    def printReservation(self):
+        jsonFile = open("./reservationDB.json")
+        allReservation= json.load(jsonFile)
+        for i in allReservation:
+            self.listReservation.insert(END, i["date"]+" by " +i["client"]+" for "+i['name'])
+
+
 class ManageData:
     def __init__(self, master):
         self.master=master
         self.master.title("Data manager")
+        self.listData = Listbox(self.master)
+        self.listData.grid(column=0, row=0)
+        self.deleteBtn = Button(self.master, text='delete')
+        self.deleteBtn.grid(column=0, row=1)
+        self.printData()
+
+    def printData(self):
+        jsonFile = open("./dataDB",)
+        allData= json.load(jsonFile)
+        for i in allData:
+            self.listData.insert(END, i["mission"]+" - "+i['date'])
 
 class mainWindow:
     def __init__(self, master):
