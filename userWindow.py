@@ -1,6 +1,7 @@
 from tkinter import *
 import satellite
 from tkinter.filedialog import askopenfilename
+from PIL import ImageTk, Image
 import json
 import time
 
@@ -73,8 +74,6 @@ class NewSatellitePage:
         self.nameBox.grid(row=0, column=1)
 
 
-        
-
     def save(self):
         name=self.nameBox.get()
         upFreq=self.upFreqBox.get()
@@ -105,19 +104,16 @@ class NewReservationPage():
         self.labelTitle = Label(self.master, text= "New reservation")
         self.labelNext = Label(self.master, text="Next passages")
         self.searchStatus = StringVar()
-        self.labelStatus=Label(self.master, text= self.searchStatus)
+        self.labelStatus=Label(self.master, textvariable= self.searchStatus)
 
         self.labelSatName = Label(self.master, text= "Satellite name")
         self.boxSatellite= Entry(self.master)
         self.btnSearch= Button(self.master, text="search",command=self.searchSatellite)
 
 
-        self.btnBrowser= Button(self.master, text="browse", command=self.OpenFile)
+        self.btnBrowser= Button(self.master, text="browse command file", command=self.OpenFile,width=18)
 
         self.availableList=Listbox(self.master)
-
-
-
 
         # place the widget in the frame
         self.labelTitle.grid(row=0, column =1)
@@ -126,8 +122,8 @@ class NewReservationPage():
         self.labelSatName.grid(row=1, column=0)
         self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
-        self.btnBrowser.grid(row=4,column=1)
-        self.availableList.grid(row=5,column=1)
+        self.btnBrowser.grid(row=5,column=1)
+        self.availableList.grid(row=4,column=1)
 
     def OpenFile(self):
          name = askopenfilename(initialdir="../../../Documents",
@@ -145,12 +141,14 @@ class NewReservationPage():
                 self.searchStatus.set('satellite found')
                 print("satellite found")
                 found =True
+        if found:
+        # TODO : erase those
+            self.availableList.insert(END,"2020_02_26@22_55_00")
+            self.availableList.insert(END, "2020_03_26@19_45_00")
+            self.availableList.insert(END, "2020_04_26@09_15_00")
+            self.availableList.insert(END, "2020_05_26@15_45_00")
+            self.availableList.insert(END, "2020_06_26@21_53_00")
         # TODO : print the time of reservation available(5) in the listbox (with predict)
-
-
-
-
-
 
 
 class GetDataPage():
@@ -167,13 +165,35 @@ class GetDataPage():
         self.btnSearch = Button(self.master, text="search")
         # TODO: connect this button to a function that will search the satellite in the database and open the data file
 
+        self.searchStatus = StringVar()
+        self.labelStatus = Label(self.master, textvariable=self.searchStatus)
+
+        self.dataList=Listbox(self.master)
+
+        self.btnDownload=Button(self.master,text="Download",width=15)
+        # TODO : connect this button to a download function
+
         # place the widget in the frame
 
         self.labelTitle.grid(row=0, column=1)
-        self.labelAvailable.grid(row=2, column=1)
+        self.labelAvailable.grid(row=3, column=1)
         self.labelSatName.grid(row=1, column=0)
         self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
+        self.labelStatus.grid(row=2,column=1)
+        self.dataList.grid(row=4,column=1)
+        self.btnDownload.grid(row=5,column=1)
+
+    def searchSatellite(self):
+        found = False
+        jsonSat = open("satelliteDB.json")
+        satelliteList = json.load(jsonSat)
+        self.searchStatus.set('satellite not found')
+        for i in satelliteList:
+            if i['name'] == self.boxSatellite.get():
+                self.searchStatus.set('satellite found')
+                print("satellite found")
+                found = True
 
 class ManageSatellite:
 
@@ -217,7 +237,7 @@ class ManageData:
     def __init__(self, master):
         self.master=master
         self.master.title("Data manager")
-        self.listData = Listbox(self.master)
+        self.listData = Listbox(self.master, width = 40)
         self.listData.grid(column=0, row=0)
         self.deleteBtn = Button(self.master, text='delete')
         self.deleteBtn.grid(column=0, row=1)
@@ -256,7 +276,10 @@ class mainWindow:
         
         self.master.config(menu=self.menubar)
         self.master.mainloop()
-
+        #imgFile=open("Logo_mission.jpg")
+        #img = ImageTk.PhotoImage(imgFile)
+        #self.polyOrbite=Label(self.master,image=img)
+        #self.polyOrbite.pack()
 
     def openNewSatellite(self):
          root2= Toplevel(self.master)
