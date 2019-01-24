@@ -162,13 +162,13 @@ class GetDataPage():
         self.labelAvailable = Label(self.master, text="Data available")
         self.labelSatName = Label(self.master, text="Satellite name")
         self.boxSatellite = Entry(self.master)
-        self.btnSearch = Button(self.master, text="search")
+        self.btnSearch = Button(self.master, text="search", command=self.searchSatellite)
         # TODO: connect this button to a function that will search the satellite in the database and open the data file
 
         self.searchStatus = StringVar()
         self.labelStatus = Label(self.master, textvariable=self.searchStatus)
 
-        self.dataList=Listbox(self.master)
+        self.dataList=Listbox(self.master,width=30)
 
         self.btnDownload=Button(self.master,text="Download",width=15)
         # TODO : connect this button to a download function
@@ -186,14 +186,15 @@ class GetDataPage():
 
     def searchSatellite(self):
         found = False
-        jsonSat = open("satelliteDB.json")
-        satelliteList = json.load(jsonSat)
+        jsonSat = open("dataDB")
+        DataList = json.load(jsonSat)
         self.searchStatus.set('satellite not found')
-        for i in satelliteList:
-            if i['name'] == self.boxSatellite.get():
+        for i in DataList:
+            if i["satellite"] == self.boxSatellite.get():
                 self.searchStatus.set('satellite found')
                 print("satellite found")
                 found = True
+                self.dataList.insert(END, i["mission"]+" - " +i['date'])
 
 class ManageSatellite:
 
