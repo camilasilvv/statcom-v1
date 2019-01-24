@@ -6,6 +6,16 @@ import json
 import time
 
 class NewSatellitePage:
+
+    '''
+    ---------------------------------------------------------
+    description: initialisation of the new Satellite page,
+    this function initialize the variables and widgets of the page
+
+    create by: Simon Belanger
+    Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+    '''
     def __init__(self, master):
 
         # window creation
@@ -24,19 +34,16 @@ class NewSatellitePage:
         # create widget for the up link transmission
         self.upVHF = Radiobutton(self.master, text="VHF", variable = self.uplinkBand, value = 1)
         self.upUHF = Radiobutton(self.master, text="UHF", variable = self.uplinkBand, value = 2)
-
         self.upFreqBox = Spinbox(self.master, from_= 0, to= 600)
-
         self.labelUpLink = Label(self.master, text="uplink")
 
-        # create variable for the down link entries
+        # create variable for the down link entry
         self.downlinkBand = StringVar()
 
         # create widget for the down link transmission
         self.downVHF = Radiobutton(self.master, text="VHF", variable = self.downlinkBand, value = 1)
         self.downUHF = Radiobutton(self.master, text="UHF", variable = self.downlinkBand, value = 2)
         self.downFreqBox = Spinbox(self.master, from_= 0, to= 600)
-
         self.labelDownLink = Label(self.master, text="downlink")
 
         #create the save button widget
@@ -44,7 +51,6 @@ class NewSatellitePage:
         #create a error box
         self.errortext=StringVar()
         self.error=Label(self.master,textvariable=self.errortext)
-        # TODO : connect the save button to a function that will save the satellite in the database
 
         #creates the owner name box and modulation box
         self.labelOwner = Label(self.master,text="owner")
@@ -73,8 +79,18 @@ class NewSatellitePage:
         self.labelName.grid(row=0, column=0)
         self.nameBox.grid(row=0, column=1)
 
+    '''
+     ---------------------------------------------------------
+    description: This function saves the satellite caracteristics to the 
+    Database named satelliteDB.json
 
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
     def save(self):
+
+        # capture every entry made by the user
         name=self.nameBox.get()
         upFreq=self.upFreqBox.get()
         downFreq=self.downFreqBox.get()
@@ -87,14 +103,23 @@ class NewSatellitePage:
             self.errortext.set("all fields must be filled!")
 
         else:
+            #saves the satellite in the database
             sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
                                       owner=owner, modulation=modulation)
             sat.saveInDB()
+            # TODO: quit the window without closing the program
 
 
+class NewReservationPage:
+    '''
+     ---------------------------------------------------------
+    description: initialisation of the new reservation page,
+    this function initialize the variables and widgets of the page
 
-
-class NewReservationPage():
+    create by: Simon Belanger
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
     def __init__(self, master):
         # window creation
         self.master = master
@@ -102,17 +127,17 @@ class NewReservationPage():
 
         # create the widget for the search bar
         self.labelTitle = Label(self.master, text= "New reservation")
-        self.labelNext = Label(self.master, text="Next passages")
         self.searchStatus = StringVar()
         self.labelStatus=Label(self.master, textvariable= self.searchStatus)
-
         self.labelSatName = Label(self.master, text= "Satellite name")
         self.boxSatellite= Entry(self.master)
         self.btnSearch= Button(self.master, text="search",command=self.searchSatellite)
 
-
+        #creates the widget to search the command file
         self.btnBrowser= Button(self.master, text="browse command file", command=self.OpenFile,width=18)
 
+        #creates widgets for the next passage list
+        self.labelNext = Label(self.master, text="Next passages")
         self.availableList=Listbox(self.master)
 
         # place the widget in the frame
@@ -125,22 +150,51 @@ class NewReservationPage():
         self.btnBrowser.grid(row=5,column=1)
         self.availableList.grid(row=4,column=1)
 
+    '''
+     ---------------------------------------------------------
+    description: this function makes the user search for his command file
+    and capture the name of the file when the browse button is pressed
+
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
     def OpenFile(self):
+
+        # open the file viewer
          name = askopenfilename(initialdir="../../../Documents",
                                 filetypes =(("Text File", "*.txt"), ("All Files", "*.*")),
                                 title="Choose a file."
                                 )
         # TODO: complete...
+
+    '''
+     ---------------------------------------------------------
+    description: This function searches the satellite in the database
+    and print out the next passages in the listbox widget
+
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
     def searchSatellite(self):
+
         found = False
+
+        # open the json file and convert it to a python list
         jsonSat= open("satelliteDB.json")
         satelliteList=json.load(jsonSat)
+
+        #update the search status
+        # TODO : verify if there is a database
         self.searchStatus.set('satellite not found')
         for i in satelliteList:
             if i['name']==self.boxSatellite.get():
                 self.searchStatus.set('satellite found')
                 print("satellite found")
                 found =True
+
+        # print the next passages if the satellite is found
         if found:
         # TODO : erase those
             self.availableList.insert(END,"2020_02_26@22_55_00")
@@ -152,6 +206,16 @@ class NewReservationPage():
 
 
 class GetDataPage():
+    '''
+     ---------------------------------------------------------
+    description: initialisation of the get Data page,
+    this function initialize the variables and widgets of the page
+
+    create by: Simon Belanger
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
+
     def __init__(self, master):
         # window creation
         self.master = master
@@ -159,19 +223,17 @@ class GetDataPage():
 
         # create the widget for the search bar
         self.labelTitle = Label(self.master, text="Get Data")
-        self.labelAvailable = Label(self.master, text="Data available")
         self.labelSatName = Label(self.master, text="Satellite name")
         self.boxSatellite = Entry(self.master)
         self.btnSearch = Button(self.master, text="search", command=self.searchSatellite)
-        # TODO: connect this button to a function that will search the satellite in the database and open the data file
-
         self.searchStatus = StringVar()
         self.labelStatus = Label(self.master, textvariable=self.searchStatus)
 
+        # creates widget for the list of data available
         self.dataList=Listbox(self.master,width=30)
-
+        self.labelAvailable = Label(self.master, text="Data available")
         self.btnDownload=Button(self.master,text="Download",width=15)
-        # TODO : connect this button to a download function
+        # TODO : connect this button (download) to a download function
 
         # place the widget in the frame
 
@@ -184,10 +246,25 @@ class GetDataPage():
         self.dataList.grid(row=4,column=1)
         self.btnDownload.grid(row=5,column=1)
 
+    '''
+     ---------------------------------------------------------
+    description: This function searches the satellite in the database
+    and print out the next passages in the listbox widget
+
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+     ---------------------------------------------------------
+    '''
     def searchSatellite(self):
+
         found = False
+
+        #convert the json file to a python list
         jsonSat = open("dataDB")
         DataList = json.load(jsonSat)
+
+        #verify if the satellite is in the database
+        # TODO : verify if there is a database
         self.searchStatus.set('satellite not found')
         for i in DataList:
             if i["satellite"] == self.boxSatellite.get():
@@ -196,8 +273,19 @@ class GetDataPage():
                 found = True
                 self.dataList.insert(END, i["mission"]+" - " +i['date'])
 
+        # TODO: print the file names available for download
+
 class ManageSatellite:
 
+    '''
+    ---------------------------------------------------------
+   description: initialisation of the get manage satellite page,
+   this function initialize the widgets of the page
+
+   create by: Simon Belanger
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+    '''
     def __init__(self, master):
 
         self.master=master
@@ -209,7 +297,16 @@ class ManageSatellite:
         self.deleteBtn.grid(column= 0, row=1)
         self.printSatellite()
 
+    '''
+        ---------------------------------------------------------
+       description: show all the satellite registered 
+
+       create by: Simon Belanger 
+       Last mmodified by : Simon Belanger @2019-01-24
+        ---------------------------------------------------------
+       '''
     def printSatellite(self):
+        # TODO : verify if there is a database
         jsonFile=open("./satelliteDB.json")
         allSatellites=json.load(jsonFile)
         print(allSatellites[0])
@@ -217,6 +314,15 @@ class ManageSatellite:
             self.listSatellite.insert(END,i["name"])
 
 class ManageReservation:
+    '''
+    ---------------------------------------------------------
+   description: initialisation of the get manage reservation page,
+   this function initialize the widgets of the page
+
+   create by: Simon Belanger
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def __init__(self, master):
         self.master=master
         self.master.title("Reservation manager")
@@ -227,7 +333,16 @@ class ManageReservation:
         self.deleteBtn.grid(column=0, row=1)
         self.printReservation()
 
+    '''
+    ---------------------------------------------------------
+   description: show all the reservations taken 
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def printReservation(self):
+        # TODO : verify if there is a database
         jsonFile = open("./reservationDB.json")
         allReservation= json.load(jsonFile)
         for i in allReservation:
@@ -235,6 +350,15 @@ class ManageReservation:
 
 
 class ManageData:
+    '''
+    ---------------------------------------------------------
+   description: initialisation of the get manage Data page,
+   this function initialize the widgets of the page
+
+   create by: Simon Belanger
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def __init__(self, master):
         self.master=master
         self.master.title("Data manager")
@@ -244,6 +368,14 @@ class ManageData:
         self.deleteBtn.grid(column=0, row=1)
         self.printData()
 
+    '''
+    ---------------------------------------------------------
+   description: show all the data available 
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def printData(self):
         jsonFile = open("./dataDB",)
         allData= json.load(jsonFile)
@@ -251,6 +383,15 @@ class ManageData:
             self.listData.insert(END, i["mission"]+" - "+i['date'])
 
 class mainWindow:
+    '''
+    ---------------------------------------------------------
+   description: initialisation of the main page,
+   this function initialize the widgets of the page
+
+   create by: Simon Belanger
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def __init__(self, master):
         self.master = master
         
@@ -282,27 +423,74 @@ class mainWindow:
         #self.polyOrbite=Label(self.master,image=img)
         #self.polyOrbite.pack()
 
+    '''
+    ---------------------------------------------------------
+   description: open the new satellite page
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def openNewSatellite(self):
          root2= Toplevel(self.master)
          newSatellitepage=NewSatellitePage(root2)
 
+    '''
+    ---------------------------------------------------------
+   description: open the new reservation page
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def openNewreservation(self):
          root2= Toplevel(self.master)
          newSatellitePage=NewReservationPage(root2)
 
+    '''
+    ---------------------------------------------------------
+   description: open the new get data page
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def openGetData(self):
         root2 = Toplevel(self.master)
         getDataPage = GetDataPage(root2)
 
+    '''
+        ---------------------------------------------------------
+       description: open the new manager page
 
+       create by: Simon Belanger 
+       Last mmodified by : Simon Belanger @2019-01-24
+        ---------------------------------------------------------
+       '''
     def openManageSatellite(self):
          root2= Toplevel(self.master)
          newSatellitepage=ManageSatellite(root2)
 
+    '''
+    ---------------------------------------------------------
+   description: open the reservation manager page
+
+   create by: Simon Belanger 
+   Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+   '''
     def openManageReservation(self):
          root2= Toplevel(self.master)
          newSatellitePage=ManageReservation(root2)
 
+    '''
+        ---------------------------------------------------------
+       description: open the data manager page
+
+       create by: Simon Belanger 
+       Last mmodified by : Simon Belanger @2019-01-24
+        ---------------------------------------------------------
+       '''
     def openManageData(self):
         root2 = Toplevel(self.master)
         getDataPage = ManageData(root2)
