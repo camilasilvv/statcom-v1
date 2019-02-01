@@ -1,9 +1,11 @@
 from tkinter import *
 import satellite
+import Reservation
 from tkinter.filedialog import askopenfilename
 from PIL import ImageTk, Image
 import json
 import time
+import os
 
 class NewSatellitePage:
 
@@ -107,7 +109,8 @@ class NewSatellitePage:
             sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
                                       owner=owner, modulation=modulation)
             sat.saveInDB()
-            # TODO: quit the window without closing the program
+            # quit the window without closing the program
+            self.master.destroy()
 
 
 class NewReservationPage:
@@ -123,6 +126,7 @@ class NewReservationPage:
     def __init__(self, master):
         # window creation
         self.master = master
+        self.timeList=[]
         self.master.title("new reservation")
 
         # create the widget for the search bar
@@ -135,10 +139,17 @@ class NewReservationPage:
 
         #creates the widget to search the command file
         self.btnBrowser= Button(self.master, text="browse command file", command=self.OpenFile,width=18)
+        self.commandName=StringVar()
+        self.boxCommandName= Entry(self.master,textvariable=self.commandName)
+
 
         #creates widgets for the next passage list
         self.labelNext = Label(self.master, text="Next passages")
-        self.availableList=Listbox(self.master)
+        self.availableList=Listbox(self.master, selectmode=MULTIPLE)
+
+        #creates the button to save the reservation
+        self.btnSave = Button(self.master, text="save", command = self.save)
+
 
         # place the widget in the frame
         self.labelTitle.grid(row=0, column =1)
@@ -147,8 +158,11 @@ class NewReservationPage:
         self.labelSatName.grid(row=1, column=0)
         self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
-        self.btnBrowser.grid(row=5,column=1)
+        self.btnBrowser.grid(row=5,column=2)
+        self.boxCommandName.grid(row=5, column=0,columnspan=2 )
         self.availableList.grid(row=4,column=1)
+        self.btnSave.grid(row=6,column=2)
+
 
     '''
      ---------------------------------------------------------
@@ -162,12 +176,16 @@ class NewReservationPage:
     def OpenFile(self):
 
         # open the file viewer
-         name = askopenfilename(initialdir="../../../Documents",
-                                filetypes =(("Text File", "*.txt"), ("All Files", "*.*")),
-                                title="Choose a file."
-                                )
-        # TODO: complete...
+        cmd = askopenfilename(initialdir="../../../Documents", filetypes =(("Wave File", "*.wav"), ("All Files", "*.*")),title="Choose a file.")
 
+        self.commandName.set(cmd)
+
+        # TODO: complete...
+    def save(self):
+        selection = self.availableList.curselection()
+        for i in range(len(self.availableList.curselection())):
+            reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), date = self.timeList[selection[i]], client ="polyorbite", lenght=10,commandFileName=self.boxCommandName.get())
+            reservation.saveInDB()
     '''
      ---------------------------------------------------------
     description: This function searches the satellite in the database
@@ -180,29 +198,31 @@ class NewReservationPage:
     def searchSatellite(self):
 
         found = False
+        # verify if the satellite is in the database
+        if os.path.isfile('./satelliteDB.json'):
 
-        # open the json file and convert it to a python list
-        jsonSat= open("satelliteDB.json")
-        satelliteList=json.load(jsonSat)
+            # open the json file and convert it to a python list
+            jsonSat= open("satelliteDB.json")
+            satelliteList=json.load(jsonSat)
 
-        #update the search status
-        # TODO : verify if there is a database
-        self.searchStatus.set('satellite not found')
-        for i in satelliteList:
-            if i['name']==self.boxSatellite.get():
-                self.searchStatus.set('satellite found')
-                print("satellite found")
-                found =True
+            #update the search status
+            self.searchStatus.set('satellite not found')
+            for i in satelliteList:
+                if i['name']==self.boxSatellite.get():
+                    self.searchStatus.set('satellite found')
+                    print("satellite found")
+                    found =True
 
-        # print the next passages if the satellite is found
-        if found:
-        # TODO : erase those
-            self.availableList.insert(END,"2020_02_26@22_55_00")
-            self.availableList.insert(END, "2020_03_26@19_45_00")
-            self.availableList.insert(END, "2020_04_26@09_15_00")
-            self.availableList.insert(END, "2020_05_26@15_45_00")
-            self.availableList.insert(END, "2020_06_26@21_53_00")
-        # TODO : print the time of reservation available(5) in the listbox (with predict)
+            # print the next passages if the satellite is found
+            if found:
+            # TODO : erase those
+                self.timeList=["2020_02_26@22_55_00","2020_03_26@19_45_00", "2020_03_26@19_45_00", "2020_05_26@15_45_00", "2020_06_26@21_53_00"]
+                for element in self.timeList:
+                    self.availableList.insert(END, element)
+
+            # TODO : print the time of reservation available(5) in the listbox (with predict)
+        else:
+            self.searchStatus.set("database not found")
 
 
 class GetDataPage():
@@ -259,21 +279,25 @@ class GetDataPage():
 
         found = False
 
-        #convert the json file to a python list
-        jsonSat = open("dataDB")
-        DataList = json.load(jsonSat)
+        # verify if the satellite is in the database
+        if os.path.isfile('./dataDB'):
 
-        #verify if the satellite is in the database
-        # TODO : verify if there is a database
-        self.searchStatus.set('satellite not found')
-        for i in DataList:
-            if i["satellite"] == self.boxSatellite.get():
-                self.searchStatus.set('satellite found')
-                print("satellite found")
-                found = True
-                self.dataList.insert(END, i["mission"]+" - " +i['date'])
+            # convert the json file to a python list
+            jsonSat = open("dataDB")
+            DataList = json.load(jsonSat)
 
-        # TODO: print the file names available for download
+
+            self.searchStatus.set('satellite not found')
+            for i in DataList:
+                if i["satellite"] == self.boxSatellite.get():
+                    self.searchStatus.set('satellite found')
+                    print("satellite found")
+                    found = True
+                    self.dataList.insert(END, i["mission"]+" - " +i['date'])
+
+            # TODO: print the file names available for download
+        else:
+            self.searchStatus.set("database not found")
 
 class ManageSatellite:
 
@@ -293,9 +317,23 @@ class ManageSatellite:
 
         self.listSatellite=Listbox(self.master)
         self.listSatellite.grid(column= 0, row=0)
-        self.deleteBtn=Button(self.master,text='delete')
+        self.deleteBtn=Button(self.master,text='delete', command=self.delete)
         self.deleteBtn.grid(column= 0, row=1)
         self.printSatellite()
+
+    def delete(self):
+
+        previousJson = open("./satelliteDB.json")
+        satelliteList=[]
+        satelliteList = json.load(previousJson)
+        selection =self.listSatellite.curselection()
+        for i in range(len(selection)):
+            satelliteList.pop(selection[i])
+            self.listSatellite.delete(selection[i])
+
+        jsonDB = json.dumps(satelliteList)
+        with open('satelliteDB.json', 'w') as satDB:
+            satDB.write(jsonDB)
 
     '''
         ---------------------------------------------------------
@@ -306,12 +344,18 @@ class ManageSatellite:
         ---------------------------------------------------------
        '''
     def printSatellite(self):
-        # TODO : verify if there is a database
-        jsonFile=open("./satelliteDB.json")
-        allSatellites=json.load(jsonFile)
-        print(allSatellites[0])
-        for i in allSatellites:
-            self.listSatellite.insert(END,i["name"])
+
+        # verify if the satellite is in the database
+        if os.path.isfile('./satelliteDB.json'):
+
+            # convert the json file to a python list
+            jsonFile=open("./satelliteDB.json")
+            allSatellites=json.load(jsonFile)
+            print(allSatellites[0])
+            for i in allSatellites:
+                self.listSatellite.insert(END,i["name"])
+        else:
+            print("database not found \n")
 
 class ManageReservation:
     '''
@@ -329,7 +373,7 @@ class ManageReservation:
 
         self.listReservation = Listbox(self.master,width=60)
         self.listReservation.grid(column=0, row=0)
-        self.deleteBtn = Button(self.master, text='delete')
+        self.deleteBtn = Button(self.master, text='delete',command=self.delete)
         self.deleteBtn.grid(column=0, row=1)
         self.printReservation()
 
@@ -342,12 +386,31 @@ class ManageReservation:
     ---------------------------------------------------------
    '''
     def printReservation(self):
-        # TODO : verify if there is a database
-        jsonFile = open("./reservationDB.json")
-        allReservation= json.load(jsonFile)
-        for i in allReservation:
-            self.listReservation.insert(END, i["date"]+" by " +i["client"]+" for "+i['name'])
 
+        # verify if the satellite is in the database
+        if os.path.isfile('./reservationDB.json'):
+
+            # convert the json file to a python list
+            jsonFile = open("./reservationDB.json")
+            allReservation= json.load(jsonFile)
+            for i in allReservation:
+                self.listReservation.insert(END, i["date"]+" by " +i["client"]+" for "+i["satellite"])
+        else:
+            print("database not found \n")
+
+    def delete(self):
+
+        previousJson = open("./reservationDB.json")
+        reservationList=[]
+        reservationList = json.load(previousJson)
+        selection =self.listReservation.curselection()
+        for i in range(len(selection)):
+            reservationList.pop(selection[i])
+            self.listReservation.delete(selection[i])
+
+        jsonDB = json.dumps(reservationList)
+        with open('reservationDB.json', 'w') as resDB:
+            resDB.write(jsonDB)
 
 class ManageData:
     '''
