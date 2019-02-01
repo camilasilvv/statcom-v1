@@ -1,21 +1,44 @@
 import satellite
 import time
+import os
+import json
 
 class Reservation:
-    def __init__(self, satellite, reservationTime, client, data):
+
+    def __init__(self, satellite, reservationTime, length, client, data):
         self.satellite = satellite
         # self.date=date #CS: check if this change affects other functions. i changed this for:
         self.reservationTime = reservationTime
         self.client=client
+        # TO DO: add entry box for data
+        self.length=length # TO DO: 
         self.data = data
 
     def saveInDB(self):
+
         previousJson = open("./reservationDB.json")
-        if os.stat("./satelliteDB.json").st_size == 0:
+        if os.stat("./reservationDB.json").st_size == 0:
             reservationList = []
+            print('empty json')
         else:
             reservationList = json.load(previousJson)
         print(type(reservationList))
+
+
+        dict = {
+            'satellite': self.satellite,
+            'reservationTime': self.reservationTime,
+            'client': self.client,
+            'length': self.length,
+            'command file': self.data,
+          # TO DO : modify userWindow.py
+        }
+
+        reservationList.append(dict)
+        jsonDB = json.dumps(reservationList)
+
+        with open('reservationDB.json', 'w') as resDB:
+            resDB.write(jsonDB)
 
         # to do : 1- set up udp connection to communicate with Predict
         #         2- make this an aggregation so that if the satellite is deleted, the reservation is as well
