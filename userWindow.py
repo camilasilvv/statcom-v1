@@ -2,7 +2,7 @@ from tkinter import *
 import satellite
 import Reservation
 from tkinter.filedialog import askopenfilename
-from PIL import ImageTk, Image
+# from PIL import ImageTk, Image
 import json
 import time
 import os

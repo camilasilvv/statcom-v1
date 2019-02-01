@@ -4,12 +4,15 @@ import os
 import json
 
 class Reservation:
-    def __init__(self, satellite, date, client, lenght,commandFileName):
+
+    def __init__(self, satellite, reservationTime, length, client, data):
         self.satellite = satellite
-        self.date=date
+        # self.date=date #CS: check if this change affects other functions. i changed this for:
+        self.reservationTime = reservationTime
         self.client=client
-        self.lenght=lenght
-        self.commandFileName=commandFileName
+        # TO DO: add entry box for data
+        self.length=length # TO DO: 
+        self.data = data
 
     def saveInDB(self):
 
@@ -21,12 +24,14 @@ class Reservation:
             reservationList = json.load(previousJson)
         print(type(reservationList))
 
+
         dict = {
             'satellite': self.satellite,
-            'date': self.date,
+            'reservationTime': self.reservationTime,
             'client': self.client,
-            'lenght': self.lenght,
-            'command file': self.commandFileName,
+            'length': self.length,
+            'command file': self.data,
+          # TO DO : modify userWindow.py
         }
 
         reservationList.append(dict)
@@ -35,3 +40,6 @@ class Reservation:
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
 
+        # to do : 1- set up udp connection to communicate with Predict
+        #         2- make this an aggregation so that if the satellite is deleted, the reservation is as well
+        #         3- fix the init of this class so that we have a command data (uplink) and received data (downlink)
