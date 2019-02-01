@@ -1,7 +1,7 @@
 from tkinter import *
 import satellite
 from tkinter.filedialog import askopenfilename
-from PIL import ImageTk, Image
+# from PIL import ImageTk, Image
 import json
 import time
 
