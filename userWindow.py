@@ -252,8 +252,8 @@ class GetDataPage():
         # creates widget for the list of data available
         self.dataList=Listbox(self.master,width=30)
         self.labelAvailable = Label(self.master, text="Data available")
-        self.btnDownload=Button(self.master,text="Download",width=15)
-        # TODO : connect this button (download) to a download function
+        self.btnDownload=Button(self.master,text="Download",width=15, command=self.downloadData)
+        self.downloadList=[]
 
         # place the widget in the frame
 
@@ -265,6 +265,7 @@ class GetDataPage():
         self.labelStatus.grid(row=2,column=1)
         self.dataList.grid(row=4,column=1)
         self.btnDownload.grid(row=5,column=1)
+
 
     '''
      ---------------------------------------------------------
@@ -294,10 +295,35 @@ class GetDataPage():
                     print("satellite found")
                     found = True
                     self.dataList.insert(END, i["mission"]+" - " +i['date'])
+                    self.downloadList.append(i["file name"])
 
             # TODO: print the file names available for download
         else:
             self.searchStatus.set("database not found")
+
+    def downloadData(self):
+
+        # verify if the satellite is in the database
+        selection = self.dataList.curselection()
+        if len(selection)==0:
+            self.searchStatus.set("choose a file")
+        else:
+            if os.path.isfile('./dataDB'):
+
+                # convert the json file to a python list
+                jsonSat = open("dataDB")
+                DataList = json.load(jsonSat)
+
+                selection = self.dataList.curselection()
+                for i in selection:
+
+                    os.rename(self.downloadList[i], "/home/simon/Documents/"+self.downloadList[i].replace("/home/simon/Downloads/", ""))
+                self.master.destroy()
+            else:
+                self.searchStatus.set('Database not found')
+
+
+
 
 class ManageSatellite:
 
@@ -412,6 +438,7 @@ class ManageReservation:
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
 
+
 class ManageData:
     '''
     ---------------------------------------------------------
@@ -427,7 +454,7 @@ class ManageData:
         self.master.title("Data manager")
         self.listData = Listbox(self.master, width = 40)
         self.listData.grid(column=0, row=0)
-        self.deleteBtn = Button(self.master, text='delete')
+        self.deleteBtn = Button(self.master, text='delete', command=self.delete)
         self.deleteBtn.grid(column=0, row=1)
         self.printData()
 
@@ -444,6 +471,21 @@ class ManageData:
         allData= json.load(jsonFile)
         for i in allData:
             self.listData.insert(END, i["mission"]+" - "+i['date'])
+
+    def delete(self):
+
+        previousJson = open("./dataDB")
+
+        dataList = json.load(previousJson)
+        selection =self.listData.curselection()
+        for i in range(len(selection)):
+            dataListList.pop(selection[i])
+            self.listData.delete(selection[i])
+
+        jsonDB = json.dumps(dataList)
+        with open('dataDB', 'w') as dataDB:
+            dataDB.write(jsonDB)
+
 
 class mainWindow:
     '''
