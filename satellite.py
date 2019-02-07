@@ -12,6 +12,7 @@ class Satellite():
         self.downBand=downBand
         self.owner=owner
         self.modulation=modulation
+        ## peut etre ajouter TLE, a voir
 
     def saveInDB(self):
 
@@ -54,5 +55,10 @@ class Satellite():
         self.downBand = dict['downBand']
         self.owner = dict['owner']
         self.modulation = dict['modulation']
+
+    def deleteSatellite(self):
+        ## this method deletes the desired satellite
+        ## make sure to delete its reservations as well
+
 
 
