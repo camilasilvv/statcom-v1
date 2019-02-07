@@ -1,6 +1,7 @@
 import json
 import shutil
 import os
+from pathlib import Path
 
 class Satellite():
     def __init__(self, name, upFreq, downFreq, upBand, downBand, owner, modulation):
@@ -13,12 +14,19 @@ class Satellite():
         self.modulation=modulation
 
     def saveInDB(self):
-        previousJson=open("./satelliteDB.json")
+
+        #check if file exist
+        file= Path("./satelliteDB.json")
+        if file.exists():
+            previousJson=open("./satelliteDB.json")
+        else:
+            previousJson = open("./satelliteDB.json",'w')
+        #check if file is empty
         if os.stat("./satelliteDB.json").st_size==0:
             satelliteList=[]
         else:
             satelliteList=json.load(previousJson)
-        print(type(satelliteList))
+
 
         dict = {
             'name':self.name,

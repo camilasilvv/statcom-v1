@@ -104,6 +104,13 @@ class NewSatellitePage:
 
             self.errortext.set("all fields must be filled!")
 
+        elif not upFreq.isdigit() or not downFreq.isdigit():
+            self.errortext.set("frequencies should be numbers")
+
+        #check if frequencies are valid
+        elif int(upFreq)>500 or int(upFreq)<100 or int(downFreq)>500 or int(downFreq)<100:
+            self.errortext.set("Frequencies not in range")
+
         else:
             #saves the satellite in the database
             sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
@@ -180,12 +187,17 @@ class NewReservationPage:
 
         self.commandName.set(cmd)
 
-        # TODO: complete...
     def save(self):
+
         selection = self.availableList.curselection()
-        for i in range(len(self.availableList.curselection())):
-            reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), date = self.timeList[selection[i]], client ="polyorbite", lenght=10,commandFileName=self.boxCommandName.get())
-            reservation.saveInDB()
+        #check if fields are empty
+        if not selection or self.boxCommandName.get()=="" or self.boxSatellite.get()=="":
+            self.searchStatus.set("All field must be filled!")
+        else:
+            for i in range(len(self.availableList.curselection())):
+                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), date = self.timeList[selection[i]], client ="polyorbite", lenght=10,commandFileName=self.boxCommandName.get())
+                reservation.saveInDB()
+            self.master.destroy()
     '''
      ---------------------------------------------------------
     description: This function searches the satellite in the database

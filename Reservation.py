@@ -2,6 +2,7 @@ import satellite
 import time
 import os
 import json
+from pathlib import Path
 
 class Reservation:
     def __init__(self, satellite, date, client, lenght,commandFileName):
@@ -13,7 +14,12 @@ class Reservation:
 
     def saveInDB(self):
 
-        previousJson = open("./reservationDB.json")
+        # check if file exist
+        file = Path("./reservationDB.json")
+        if file.exists():
+            previousJson = open("./reservationDB.json")
+        else:
+            previousJson = open("./reservationDB.json", "w")
         if os.stat("./reservationDB.json").st_size == 0:
             reservationList = []
             print('empty json')
