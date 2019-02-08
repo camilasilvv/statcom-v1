@@ -56,9 +56,4 @@ class Satellite():
         self.owner = dict['owner']
         self.modulation = dict['modulation']
 
-    def deleteSatellite(self):
-        ## this method deletes the desired satellite
-        ## make sure to delete its reservations as well
-
-
-
+    
