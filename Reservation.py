@@ -7,11 +7,10 @@ class Reservation:
 
     def __init__(self, satellite, reservationTime, length, client, data):
         self.satellite = satellite
-        # self.date=date #CS: check if this change affects other functions. i changed this for:
         self.reservationTime = reservationTime
         self.client=client
-        # TO DO: add entry box for data
-        self.length=length # TO DO: 
+        # TOdO: add entry box for data
+        self.length=length
         self.data = data
 
     def saveInDB(self):
@@ -27,11 +26,11 @@ class Reservation:
 
         dict = {
             'satellite': self.satellite,
-            'reservationTime': self.reservationTime,
+            'reservationTime': self.reservationTime, #TODO: make sure that time units/formats are compatible
             'client': self.client,
             'length': self.length,
             'command file': self.data,
-          # TO DO : modify userWindow.py
+          # TODO : modify userWindow.py
         }
 
         reservationList.append(dict)
@@ -40,6 +39,6 @@ class Reservation:
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
 
-        # to do : 1- set up udp connection to communicate with Predict
+        #todo: 1- set up udp connection to communicate with Predict
         #         2- make this an aggregation so that if the satellite is deleted, the reservation is as well
         #         3- fix the init of this class so that we have a command data (uplink) and received data (downlink)

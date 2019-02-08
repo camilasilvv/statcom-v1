@@ -5,4 +5,4 @@ class Data():
         self.receivedData= commandData
         self.commandData = commandData
 
-        # to do :1 implemet communication with sdr to create/get WAV files
+        # todo :1 implemet communication with sdr to create/get WAV files

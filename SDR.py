@@ -7,4 +7,4 @@ class SDR():
         self.serialNumber = serialNumber
         self.frequency = frequency
 
-        # to do : 1 - fix channel suplink, downlink..
+        # todo : 1 - fix channel suplink, downlink..

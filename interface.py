@@ -1,9 +1,20 @@
 import json
-import time
+import time, sched
 
 
 
-print(time.localtime())
+
+## block of code that allows to test for a scheuled event:
+s = sched.scheduler(time.time(), time.sleep)
+print(time.localtime(time.time()), "Call motor controller function !")
+def print_time(a='default'):
+     print("From print_time", time.time(), a)
+def print_some_times():
+     s.enter(10, 1, print_time)
+     s.enter(5, 2, print_time, argument=('positional',))
+     s.enter(5, 1, print_time, kwargs={'a': 'keyword'})
+     s.run()
+     print(time.localtime(time.time), "Call motor controller function !")
 
 
 
@@ -69,47 +80,47 @@ print(time.localtime())
 #
 #with open('data.json', 'w') as outfile:
 #    json.dump(data, outfile)
-
-def ConfigurationSDR():
-    # Cette fonction permet de configurer LimeSDR a partir des donnees entrees par l'usager
-
-def PositionAntenne():
-    # Cette fonction permet d'envoyer les parametres de suivi a l'Arduino pour le controle des moteurs
-
-def StoreData():
-    # Cette fonction permet d'enrgistrer les donnees recues dans la base de donnees, et de creer les fichiers de
-    # la base de donnees, le cas echeant
-
-def Receive():
-    # Cette fonction permet de recevoir les donnees decodees par LimeSDR et les enregistrer dans la base de donnees
-    # bloc provenant de LimeSDR
-    StoreData()
-
-def SendCommand():
-    # Cette fonction permet d'envoyer les commandes entrees par l'usager au SDR
-
-def ShowData():
-    # Cette fonction permet d'afficher les donnees les plus recentes des missions sur l'interface graphique.
-    # La fonction ouvre et lit les fichiers de donnees des deux dernieres semaines, et ensuite affiche la valeur la
-    # plus recentes de chaque varible
-    # a inserer bloc pour l'affichage dans l'interface
-
-def StreamCamera():
-    # Cette fonction permet d'initialiser la camera de surveillance, de recevoir et afficher la video en temps reel
-
-def GPredictMap():
-    # Cette fonction permet d'afficher la carte GPredict, bloc code open source
-
-def EntreeDonnesSDR():
-    # Cette fonction permet a l'usager d'entrer les parametres pour la configuration du SDR
-    # a regarder les parametres requis pour le suivi dans les bloc code de LimeSDR
-
-def TrackingTLE():
-    # Cette fonction permet a l'usager d'entrer les two-line element pour le suivi du satellite
-
-def EntreeCommands():
-    # Cette fonction permet a l'usager d'entrer les commandes a envoyer au satellite
-
-def ConfigurationInterface():
-    # Cette fonction permet de configurer l'environnement pour l'interface graphique
-    # a ajouter tous les blocs pour les entrees de commandes, parametres, etc
+#
+# def ConfigurationSDR():
+#     # Cette fonction permet de configurer LimeSDR a partir des donnees entrees par l'usager
+#
+# def PositionAntenne():
+#     # Cette fonction permet d'envoyer les parametres de suivi a l'Arduino pour le controle des moteurs
+#
+# def StoreData():
+#     # Cette fonction permet d'enrgistrer les donnees recues dans la base de donnees, et de creer les fichiers de
+#     # la base de donnees, le cas echeant
+#
+# def Receive():
+#     # Cette fonction permet de recevoir les donnees decodees par LimeSDR et les enregistrer dans la base de donnees
+#     # bloc provenant de LimeSDR
+#     StoreData()
+#
+# def SendCommand():
+#     # Cette fonction permet d'envoyer les commandes entrees par l'usager au SDR
+#
+# def ShowData():
+#     # Cette fonction permet d'afficher les donnees les plus recentes des missions sur l'interface graphique.
+#     # La fonction ouvre et lit les fichiers de donnees des deux dernieres semaines, et ensuite affiche la valeur la
+#     # plus recentes de chaque varible
+#     # a inserer bloc pour l'affichage dans l'interface
+#
+# def StreamCamera():
+#     # Cette fonction permet d'initialiser la camera de surveillance, de recevoir et afficher la video en temps reel
+#
+# def GPredictMap():
+#     # Cette fonction permet d'afficher la carte GPredict, bloc code open source
+#
+# def EntreeDonnesSDR():
+#     # Cette fonction permet a l'usager d'entrer les parametres pour la configuration du SDR
+#     # a regarder les parametres requis pour le suivi dans les bloc code de LimeSDR
+#
+# def TrackingTLE():
+#     # Cette fonction permet a l'usager d'entrer les two-line element pour le suivi du satellite
+#
+# def EntreeCommands():
+#     # Cette fonction permet a l'usager d'entrer les commandes a envoyer au satellite
+#
+# def ConfigurationInterface():
+#     # Cette fonction permet de configurer l'environnement pour l'interface graphique
+#     # a ajouter tous les blocs pour les entrees de commandes, parametres, etc
