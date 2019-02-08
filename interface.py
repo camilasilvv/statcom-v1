@@ -1,6 +1,12 @@
 import json
 import time
 
+
+
+print(time.localtime())
+
+
+
 # while True:
 # test 1:
 # 	## Enregistrer les donnees recues du SDR sur la base de donnees:
