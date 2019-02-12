@@ -6,6 +6,8 @@ from tkinter.filedialog import askopenfilename
 import json
 import time
 import os
+import subprocess
+
 
 class NewSatellitePage:
 
@@ -152,7 +154,7 @@ class NewReservationPage:
 
         #creates widgets for the next passage list
         self.labelNext = Label(self.master, text="Next passages")
-        self.availableList=Listbox(self.master, selectmode=MULTIPLE)
+        self.availableList=Listbox(self.master, selectmode=MULTIPLE, width=40)
 
         #creates the button to save the reservation
         self.btnSave = Button(self.master, text="save", command = self.save)
@@ -200,11 +202,12 @@ class NewReservationPage:
             self.master.destroy()
     '''
      ---------------------------------------------------------
-    description: This function searches the satellite in the database
+    @newfield brief: Description
+    @brief: This function searches the satellite in the database
     and print out the next passages in the listbox widget
 
-    create by: Simon Belanger 
-    Last mmodified by : Simon Belanger @2019-01-24
+    @author: Simon Belanger 
+    @date : Simon Belanger @2019-01-24
      ---------------------------------------------------------
     '''
     def searchSatellite(self):
@@ -228,13 +231,46 @@ class NewReservationPage:
             # print the next passages if the satellite is found
             if found:
             # TODO : erase those
-                self.timeList=["2020_02_26@22_55_00","2020_03_26@19_45_00", "2020_03_26@19_45_00", "2020_05_26@15_45_00", "2020_06_26@21_53_00"]
-                for element in self.timeList:
-                    self.availableList.insert(END, element)
+                #self.timeList=["2020_02_26@22_55_00","2020_03_26@19_45_00", "2020_03_26@19_45_00", "2020_05_26@15_45_00", "2020_06_26@21_53_00"]
+                nextTime=str(int(time.time()))
+
+                for i in range(5):
+                    nextPass=self.getPassages(nextTime)
+                    print(nextPass)
+                    self.availableList.insert(END, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0])))+'->'+str(int(nextPass[1])-int(nextPass[0])))
+                    nextTime=str(int(nextPass[1])+30)
+                    print(nextTime)
 
             # TODO : print the time of reservation available(5) in the listbox (with predict)
         else:
             self.searchStatus.set("database not found")
+
+    '''
+        ---------------------------------------------------------
+       @newfield brief: Description
+       @brief: Searches the next passages with predict
+
+       @author: Simon Belanger 
+       @date : Simon Belanger @2019-01-24
+        ---------------------------------------------------------
+       '''
+    def getPassages(self, time):
+        cmd = ['predict', '-p', self.boxSatellite.get(), time]
+
+        # executes the cmd and capture the output
+        output = subprocess.Popen(cmd, stdout = subprocess.PIPE).communicate()[0]
+
+        #convert bytes to string
+        strCmd=output.decode("utf-8")
+
+        #split to have a single line
+        strLine= strCmd.split('\n')
+
+        #split to have two single times
+        strTimeBegin=strLine[0].split(' ')
+        strTimeEnd=strLine[len(strLine)-2].split(' ')
+
+        return [strTimeBegin[0],strTimeEnd[0]]
 
 
 class GetDataPage():
