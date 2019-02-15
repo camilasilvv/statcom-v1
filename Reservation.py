@@ -4,6 +4,8 @@ import os
 import json
 from pathlib import Path
 
+import time, sched
+
 class Reservation:
 
     def __init__(self, satellite, reservationTime, length, client, data):
@@ -17,7 +19,7 @@ class Reservation:
     def saveInDB(self):
 
         # check if file exist
-        file = Path("./reservationDB.json")
+        file = Path(pyt"./reservationDB.json")
         if file.exists():
             previousJson = open("./reservationDB.json")
         else:
@@ -48,3 +50,5 @@ class Reservation:
         #todo: 1- set up udp connection to communicate with Predict
         #         2- make this an aggregation so that if the satellite is deleted, the reservation is as well
         #         3- fix the init of this class so that we have a command data (uplink) and received data (downlink)
+
+
