@@ -12,7 +12,7 @@ class Satellite():
         self.downBand=downBand
         self.owner=owner
         self.modulation=modulation
-        ## peut etre ajouter TLE, a voir!
+        ## peut etre ajouter TLE, a voir
 
     def saveInDB(self):
 
