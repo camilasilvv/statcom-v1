@@ -114,24 +114,24 @@ class NewSatellitePage:
 
             self.errortext.set("all fields must be filled!")
 
-        elif not upFreq.isdigit() or not downFreq.isdigit():
-            self.errortext.set("frequencies should be numbers")
-
-        #check if frequencies are valid
-        elif float(upFreq)>500 or float(upFreq)<100 or float(downFreq)>500 or float(downFreq)<100:
-            self.errortext.set("Frequencies not in range")
-
         else:
-            #saves the satellite in the database
-            sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
-                                      owner=owner, modulation=modulation)
-            sat.saveInDB()
-            #save the TLE in predict TLE
-            TLEDB = open("/home/simon/.predict/predict.tle", 'a')
-            newTLE= '\n'+name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()
-            TLEDB.write(newTLE)
-            # quit the window without closing the program
-            self.master.destroy()
+
+            try:
+                if float(upFreq) > 500 or float(upFreq) < 100 or float(downFreq) > 500 or float(downFreq) < 100:
+                    self.errortext.set("Frequencies not in range")
+                else:
+                    #saves the satellite in the database
+                    sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
+                                              owner=owner, modulation=modulation)
+                    sat.saveInDB()
+                    #save the TLE in predict TLE
+                    TLEDB = open("/home/simon/.predict/predict.tle", 'a')
+                    newTLE= '\n'+name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()
+                    TLEDB.write(newTLE)
+                    # quit the window without closing the program
+                    self.master.destroy()
+            except ValueError:
+                self.errortext.set("frequencies should be numbers")
 
 
 class NewReservationPage:
@@ -148,6 +148,8 @@ class NewReservationPage:
         # window creation
         self.master = master
         self.timeList=[]
+        self.lenghtList=[]
+        self.frequencies=[]
         self.master.title("new reservation")
 
         # create the widget for the search bar
@@ -205,11 +207,13 @@ class NewReservationPage:
 
         selection = self.availableList.curselection()
         #check if fields are empty
-        if not selection or self.boxCommandName.get()=="" or self.boxSatellite.get()=="":
+        if not selection:
             self.searchStatus.set("All field must be filled!")
         else:
             for i in range(len(self.availableList.curselection())):
-                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), date = self.timeList[selection[i]], client ="polyorbite", lenght=10,commandFileName=self.boxCommandName.get())
+                print(selection[i])
+                print(self.timeList[selection[i]])
+                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(),frequencies=self.frequencies )
                 reservation.saveInDB()
             self.master.destroy()
     '''
@@ -237,6 +241,8 @@ class NewReservationPage:
             for i in satelliteList:
                 if i['name']==self.boxSatellite.get():
                     self.searchStatus.set('satellite found')
+                    self.frequencies.append(i['upFreq'])
+                    self.frequencies.append(i['downFreq'])
                     print("satellite found")
                     found =True
 
@@ -249,6 +255,8 @@ class NewReservationPage:
                 for i in range(5):
                     nextPass=self.getPassages(nextTime)
                     print(nextPass)
+                    self.timeList.append( time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0]))))
+                    self.lenghtList.append(int(nextPass[1])-int(nextPass[0]))
                     self.availableList.insert(END, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0])))+'->'+str(int(nextPass[1])-int(nextPass[0])))
                     nextTime=str(int(nextPass[1])+30)
                     print(nextTime)
