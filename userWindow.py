@@ -62,6 +62,11 @@ class NewSatellitePage:
         self.labelModulation = Label(self.master, text="Modulation")
         self.boxModulation = Entry(self.master)
 
+        #create a widget for TLE
+        self.labelTLE=Label(self.master, text="TLE parameters")
+        self.boxTLE = Entry(self.master)
+        self.boxTLE2= Entry(self.master)
+
         # place the widgets
         self.labelUpLink.grid(row=1, column=0, rowspan=2)
         self.upVHF.grid(row=1, column=1)
@@ -79,9 +84,12 @@ class NewSatellitePage:
         self.boxModulation.grid(row=6, column=1)
 
         self.error.grid(row=7, column=1)
-        self.saveBtn.grid(row=8, column=6)
+        self.saveBtn.grid(row=9, column=3)
         self.labelName.grid(row=0, column=0)
         self.nameBox.grid(row=0, column=1)
+        self.boxTLE.grid(row=8, column= 1)
+        self.boxTLE2.grid(row=9, column=1)
+        self.labelTLE.grid(row=8,column=0, rowspan=2)
 
     '''
      ---------------------------------------------------------
@@ -110,7 +118,7 @@ class NewSatellitePage:
             self.errortext.set("frequencies should be numbers")
 
         #check if frequencies are valid
-        elif int(upFreq)>500 or int(upFreq)<100 or int(downFreq)>500 or int(downFreq)<100:
+        elif float(upFreq)>500 or float(upFreq)<100 or float(downFreq)>500 or float(downFreq)<100:
             self.errortext.set("Frequencies not in range")
 
         else:
@@ -118,6 +126,10 @@ class NewSatellitePage:
             sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
                                       owner=owner, modulation=modulation)
             sat.saveInDB()
+            #save the TLE in predict TLE
+            TLEDB = open("/home/simon/.predict/predict.tle", 'a')
+            newTLE= '\n'+name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()
+            TLEDB.write(newTLE)
             # quit the window without closing the program
             self.master.destroy()
 
@@ -559,7 +571,7 @@ class mainWindow:
         self.menu1.add_command(label="new reservation", command = self.openNewreservation)
         self.menu1.add_command(label="get data", command = self.openGetData)
         self.menu1.add_separator()
-        self.menu1.add_command(label="exit")
+        self.menu1.add_command(label="exit", command=self.master.destroy)
 
         self.menubar.add_cascade(label="File",menu=self.menu1)
         self.menu2.add_command(label="manage satellite",command=self.openManageSatellite)
