@@ -488,7 +488,7 @@ class ManageReservation:
             jsonFile = open("./reservationDB.json")
             allReservation= json.load(jsonFile)
             for i in allReservation:
-                self.listReservation.insert(END, i["date"]+" by " +i["client"]+" for "+i["satellite"])
+                self.listReservation.insert(END, i["reservationTime"]+" by " +i["client"]+" for "+i["satellite"])
         else:
             print("database not found \n")
 
@@ -590,11 +590,33 @@ class mainWindow:
         self.menubar.add_command(label="help")
         
         self.master.config(menu=self.menubar)
+        #creates widget for printing the next reservation time
+        self.updateBtn = Button(self.master, text='update', command=self.update).grid(row=0,column=0)
+        self.nextReservation= StringVar()
+        self.title= Label(self.master, text='Next passage').grid(row=1,column=0)
+        #self.reservationTable=Label(self.master, text='nextReservation')
+        self.reservationTable = Label(self.master, textvariable=self.nextReservation).grid(row=2, column=0)
+
+
         self.master.mainloop()
-        #imgFile=open("Logo_mission.jpg")
-        #img = ImageTk.PhotoImage(imgFile)
-        #self.polyOrbite=Label(self.master,image=img)
-        #self.polyOrbite.pack()
+
+
+    def update(self):
+        # verify if the satellite is in the database
+        if os.path.isfile('./reservationDB.json'):
+
+            # convert the json file to a python list
+            jsonFile = open("./reservationDB.json")
+            allReservation = json.load(jsonFile)
+            self.nextReservation.set('')
+            for i in allReservation:
+
+                self.nextReservation.set(self.nextReservation.get() + i["reservationTime"] + " by " + i["client"] + " for " + i["satellite"]+'\n')
+
+
+        else:
+            self.nextReservation='database not found'
+
 
     '''
     ---------------------------------------------------------
@@ -672,6 +694,8 @@ class mainWindow:
 def main():
     root=Tk()
     firstPage= mainWindow(root)
+    firstPage.update()
+
     root.mainloop()
 
 

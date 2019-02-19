@@ -43,12 +43,15 @@ class Reservation:
         }
 
         reservationList.append(dict)
+
+        #sorting the database by soonest reservation time
+        reservationList = sorted(reservationList, key=lambda k: k['reservationTime'])
+
         jsonDB = json.dumps(reservationList)
 
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
 
-        #todo: 1- set up udp connection to communicate with Predict
-        #         2- make this an aggregation so that if the satellite is deleted, the reservation is as well
+        #todo:    2- make this an aggregation so that if the satellite is deleted, the reservation is as well
         #         3- fix the init of this class so that we have a command data (uplink) and received data (downlink)
 
