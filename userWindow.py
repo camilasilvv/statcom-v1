@@ -128,7 +128,7 @@ class NewSatellitePage:
                     sat.saveInDB()
                     #save the TLE in predict TLE
                     TLEDB = open("/home/simon/.predict/predict.tle", 'a')
-                    newTLE= '\n'+name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()
+                    newTLE= name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()+'\n'
                     TLEDB.write(newTLE)
                     # quit the window without closing the program
                     self.master.destroy()
