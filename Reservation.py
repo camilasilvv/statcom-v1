@@ -8,19 +8,35 @@ import time, sched
 
 class Reservation:
 
-    def __init__(self, satellite, reservationTime, length, client, data, frequencies):
+
+
+    def __init__(self, satellite, reservationTime, setUpTime, length, client, data):
+
         self.satellite = satellite
         self.reservationTime = reservationTime
+        self.setUpTime = setUpTime
+        self.setUpTime = reservationTime - 2*60
         self.client=client
-        # TOdO: add entry box for data
         self.length=length
         self.data = data
         self.frequencies=frequencies
 
+
+
+    ##  this print function allows to simulate calling the motor functions that arent implemented yet:
+    def print_function(a='default'):
+        print("From print_function", time.time(), a)
+
+    def schedule_pass(self):
+        s = sched.scheduler(time.time)
+        s.enterabs(self.setUpTime, 1, Reservation.print_function('Call Motor set up time'))
+        s.enterabs(self.reservationTime, 1, Reservation.print_function('Call track Satellite time'))
+        # TODO: replace print with the real function
+
     def saveInDB(self):
 
         # check if file exist
-        file = Path(pyt"./reservationDB.json")
+        file = Path("./reservationDB.json")
         if file.exists():
             previousJson = open("./reservationDB.json")
         else:
@@ -35,7 +51,8 @@ class Reservation:
 
         dict = {
             'satellite': self.satellite,
-            'reservationTime': self.reservationTime, #TODO: make sure that time units/formats are compatible
+            'reservationTime': self.reservationTime,
+            'setUpTime': self.setUpTime,
             'client': self.client,
             'length': self.length,
             'command file': self.data,
@@ -54,7 +71,16 @@ class Reservation:
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
 
-        #todo:    2- make this an aggregation so that if the satellite is deleted, the reservation is as well
-        #         3- fix the init of this class so that we have a command data (uplink) and received data (downlink)
-
+            jsonDB.sort(key = lambda x: x['setUpTime'], reverse = True)
+            for i in jsonDB['reservation']:
+                next = i+1
+                prev = i -1
+                if prev['reservationTime']+prev['length']+1 > i['setUpTime']:
+                    #todo: delete reservation json
+                    print('this reservation is impossible')
+                elif i['reservationTime']+i['length']+1 > next['setUpTime']:
+                    # todo: delete reservation json
+                    print('this reservation is impossible')
+                else:
+                    print('the reservations are okay')
 

@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import satellite
 import Reservation
 from tkinter.filedialog import askopenfilename
@@ -7,6 +8,7 @@ import json
 import time
 import os
 import subprocess
+import signal
 
 
 class NewSatellitePage:
@@ -579,16 +581,24 @@ class mainWindow:
         self.menu1.add_command(label="new reservation", command = self.openNewreservation)
         self.menu1.add_command(label="get data", command = self.openGetData)
         self.menu1.add_separator()
-        self.menu1.add_command(label="exit", command=self.master.destroy)
+
+        self.menu1.add_command(label="exit", command = self.on_closing)
+
 
         self.menubar.add_cascade(label="File",menu=self.menu1)
         self.menu2.add_command(label="manage satellite",command=self.openManageSatellite)
         self.menu2.add_command(label="manage reservation", command=self.openManageReservation)
         self.menu2.add_command(label="manage data", command=self.openManageData)
+        self.menu2.add_command(label="update SDR", command=self.update_SDR)
         self.menubar.add_cascade(label="Edit", menu=self.menu2)
 
         self.menubar.add_command(label="help")
-        
+
+        self.gpredict_pid = subprocess.Popen("gpredict &", stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        self.predict_udp = subprocess.Popen("predict -s &", stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.master.config(menu=self.menubar)
         #creates widget for printing the next reservation time
         self.updateBtn = Button(self.master, text='update', command=self.update).grid(row=0,column=0)
@@ -679,19 +689,47 @@ class mainWindow:
          newSatellitePage=ManageReservation(root2)
 
     '''
-        ---------------------------------------------------------
-       description: open the data manager page
+    ---------------------------------------------------------
+    description: open the data manager page
 
-       create by: Simon Belanger 
-       Last mmodified by : Simon Belanger @2019-01-24
-        ---------------------------------------------------------
-       '''
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+    '''
     def openManageData(self):
         root2 = Toplevel(self.master)
         getDataPage = ManageData(root2)
 
+    '''
+    ---------------------------------------------------------
+    description: Update LimeSDR
+
+    create by: Emile Cote Pelletier
+    Last mmodified by : Emile Cote Pelletier @2019-02-17
+    ---------------------------------------------------------
+    '''
+    def update_SDR(self):
+        update = os.system("LimeUtil --update")
+        if update != 0:
+        	messagebox.showerror("SDR Update","No Device connected")
+       	else:	
+       		messagebox.showinfo("SDR Update","Device Updated !")
+    '''
+	---------------------------------------------------------
+    description: Close backprocess when closing the app
+
+    create by: Emile Cote Pelletier
+    Last mmodified by : Emile Cote Pelletier @2019-02-17
+    ---------------------------------------------------------
+    '''	
+    def on_closing(self):
+    	os.killpg(os.getpgid(self.gpredict_pid.pid), signal.SIGTERM)
+    	os.killpg(os.getpgid(self.predict_udp.pid), signal.SIGTERM)
+    	self.master.destroy()
+
 
 def main():
+
     root=Tk()
     firstPage= mainWindow(root)
     firstPage.update()
