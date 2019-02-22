@@ -62,10 +62,15 @@ class Reservation:
         }
 
         reservationList.append(dict)
+
+        #sorting the database by soonest reservation time
+        reservationList = sorted(reservationList, key=lambda k: k['reservationTime'])
+
         jsonDB = json.dumps(reservationList)
 
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
+
             jsonDB.sort(key = lambda x: x['setUpTime'], reverse = True)
             for i in jsonDB['reservation']:
                 next = i+1
@@ -78,3 +83,4 @@ class Reservation:
                     print('this reservation is impossible')
                 else:
                     print('the reservations are okay')
+
