@@ -1,4 +1,5 @@
 from tkinter import *
+from tkinter import messagebox
 import satellite
 import Reservation
 from tkinter.filedialog import askopenfilename
@@ -7,6 +8,7 @@ import json
 import time
 import os
 import subprocess
+import signal
 
 
 class NewSatellitePage:
@@ -62,6 +64,11 @@ class NewSatellitePage:
         self.labelModulation = Label(self.master, text="Modulation")
         self.boxModulation = Entry(self.master)
 
+        #create a widget for TLE
+        self.labelTLE=Label(self.master, text="TLE parameters")
+        self.boxTLE = Entry(self.master)
+        self.boxTLE2= Entry(self.master)
+
         # place the widgets
         self.labelUpLink.grid(row=1, column=0, rowspan=2)
         self.upVHF.grid(row=1, column=1)
@@ -79,9 +86,12 @@ class NewSatellitePage:
         self.boxModulation.grid(row=6, column=1)
 
         self.error.grid(row=7, column=1)
-        self.saveBtn.grid(row=8, column=6)
+        self.saveBtn.grid(row=9, column=3)
         self.labelName.grid(row=0, column=0)
         self.nameBox.grid(row=0, column=1)
+        self.boxTLE.grid(row=8, column= 1)
+        self.boxTLE2.grid(row=9, column=1)
+        self.labelTLE.grid(row=8,column=0, rowspan=2)
 
     '''
      ---------------------------------------------------------
@@ -106,20 +116,24 @@ class NewSatellitePage:
 
             self.errortext.set("all fields must be filled!")
 
-        elif not upFreq.isdigit() or not downFreq.isdigit():
-            self.errortext.set("frequencies should be numbers")
-
-        #check if frequencies are valid
-        elif int(upFreq)>500 or int(upFreq)<100 or int(downFreq)>500 or int(downFreq)<100:
-            self.errortext.set("Frequencies not in range")
-
         else:
-            #saves the satellite in the database
-            sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
-                                      owner=owner, modulation=modulation)
-            sat.saveInDB()
-            # quit the window without closing the program
-            self.master.destroy()
+
+            try:
+                if float(upFreq) > 500 or float(upFreq) < 100 or float(downFreq) > 500 or float(downFreq) < 100:
+                    self.errortext.set("Frequencies not in range")
+                else:
+                    #saves the satellite in the database
+                    sat = satellite.Satellite(name=name, upFreq=upFreq, downFreq=downFreq, upBand="UHF", downBand="VHF",
+                                              owner=owner, modulation=modulation)
+                    sat.saveInDB()
+                    #save the TLE in predict TLE
+                    TLEDB = open("/home/simon/.predict/predict.tle", 'a')
+                    newTLE= '\n'+name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()
+                    TLEDB.write(newTLE)
+                    # quit the window without closing the program
+                    self.master.destroy()
+            except ValueError:
+                self.errortext.set("frequencies should be numbers")
 
 
 class NewReservationPage:
@@ -136,6 +150,8 @@ class NewReservationPage:
         # window creation
         self.master = master
         self.timeList=[]
+        self.lenghtList=[]
+        self.frequencies=[]
         self.master.title("new reservation")
 
         # create the widget for the search bar
@@ -193,11 +209,13 @@ class NewReservationPage:
 
         selection = self.availableList.curselection()
         #check if fields are empty
-        if not selection or self.boxCommandName.get()=="" or self.boxSatellite.get()=="":
+        if not selection:
             self.searchStatus.set("All field must be filled!")
         else:
             for i in range(len(self.availableList.curselection())):
-                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), date = self.timeList[selection[i]], client ="polyorbite", lenght=10,commandFileName=self.boxCommandName.get())
+                print(selection[i])
+                print(self.timeList[selection[i]])
+                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(),frequencies=self.frequencies )
                 reservation.saveInDB()
             self.master.destroy()
     '''
@@ -225,6 +243,8 @@ class NewReservationPage:
             for i in satelliteList:
                 if i['name']==self.boxSatellite.get():
                     self.searchStatus.set('satellite found')
+                    self.frequencies.append(i['upFreq'])
+                    self.frequencies.append(i['downFreq'])
                     print("satellite found")
                     found =True
 
@@ -237,6 +257,8 @@ class NewReservationPage:
                 for i in range(5):
                     nextPass=self.getPassages(nextTime)
                     print(nextPass)
+                    self.timeList.append( time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0]))))
+                    self.lenghtList.append(int(nextPass[1])-int(nextPass[0]))
                     self.availableList.insert(END, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0])))+'->'+str(int(nextPass[1])-int(nextPass[0])))
                     nextTime=str(int(nextPass[1])+30)
                     print(nextTime)
@@ -559,16 +581,24 @@ class mainWindow:
         self.menu1.add_command(label="new reservation", command = self.openNewreservation)
         self.menu1.add_command(label="get data", command = self.openGetData)
         self.menu1.add_separator()
-        self.menu1.add_command(label="exit")
+
+        self.menu1.add_command(label="exit", command = self.on_closing)
+
 
         self.menubar.add_cascade(label="File",menu=self.menu1)
         self.menu2.add_command(label="manage satellite",command=self.openManageSatellite)
         self.menu2.add_command(label="manage reservation", command=self.openManageReservation)
         self.menu2.add_command(label="manage data", command=self.openManageData)
+        self.menu2.add_command(label="update SDR", command=self.update_SDR)
         self.menubar.add_cascade(label="Edit", menu=self.menu2)
 
         self.menubar.add_command(label="help")
-        
+
+        self.gpredict_pid = subprocess.Popen("gpredict &", stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+        self.predict_udp = subprocess.Popen("predict -s &", stdout=subprocess.PIPE, shell=True, preexec_fn=os.setsid)
+
+        self.master.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         self.master.config(menu=self.menubar)
         self.master.mainloop()
         #imgFile=open("Logo_mission.jpg")
@@ -637,19 +667,47 @@ class mainWindow:
          newSatellitePage=ManageReservation(root2)
 
     '''
-        ---------------------------------------------------------
-       description: open the data manager page
+    ---------------------------------------------------------
+    description: open the data manager page
 
-       create by: Simon Belanger 
-       Last mmodified by : Simon Belanger @2019-01-24
-        ---------------------------------------------------------
-       '''
+    create by: Simon Belanger 
+    Last mmodified by : Simon Belanger @2019-01-24
+    ---------------------------------------------------------
+    '''
     def openManageData(self):
         root2 = Toplevel(self.master)
         getDataPage = ManageData(root2)
 
+    '''
+    ---------------------------------------------------------
+    description: Update LimeSDR
+
+    create by: Emile Cote Pelletier
+    Last mmodified by : Emile Cote Pelletier @2019-02-17
+    ---------------------------------------------------------
+    '''
+    def update_SDR(self):
+        update = os.system("LimeUtil --update")
+        if update != 0:
+        	messagebox.showerror("SDR Update","No Device connected")
+       	else:	
+       		messagebox.showinfo("SDR Update","Device Updated !")
+    '''
+	---------------------------------------------------------
+    description: Close backprocess when closing the app
+
+    create by: Emile Cote Pelletier
+    Last mmodified by : Emile Cote Pelletier @2019-02-17
+    ---------------------------------------------------------
+    '''	
+    def on_closing(self):
+    	os.killpg(os.getpgid(self.gpredict_pid.pid), signal.SIGTERM)
+    	os.killpg(os.getpgid(self.predict_udp.pid), signal.SIGTERM)
+    	self.master.destroy()
+
 
 def main():
+
     root=Tk()
     firstPage= mainWindow(root)
     root.mainloop()

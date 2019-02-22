@@ -9,7 +9,9 @@ import time, sched
 class Reservation:
 
 
+
     def __init__(self, satellite, reservationTime, setUpTime, length, client, data):
+
         self.satellite = satellite
         self.reservationTime = reservationTime
         self.setUpTime = setUpTime
@@ -17,6 +19,7 @@ class Reservation:
         self.client=client
         self.length=length
         self.data = data
+        self.frequencies=frequencies
 
 
 
@@ -53,7 +56,9 @@ class Reservation:
             'client': self.client,
             'length': self.length,
             'command file': self.data,
-
+            'Uplink': self.frequencies[0],
+            'Downlink': self.frequencies[1]
+          # TODO : modify userWindow.py
         }
 
         reservationList.append(dict)

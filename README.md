@@ -1,5 +1,6 @@
 # statcom-v1
 
+
 ## 1. Packages
 
 Here's the list of package to install:
@@ -26,7 +27,7 @@ wget -qr www.celestrak.com/NORAD/elements/weather.txt -O weather.txt
 sudo chmod +x UpdateTLE.sh
 ```
 
-At this point, you can simply run the script through the terminal. You can also make it so 
+At this point, you can simply run the script through the terminal to update the TLE manually. You can also make it so 
 it updates everyday. For this feature, go to step 4.
 
 - Step 4: Open crontab:
@@ -40,3 +41,27 @@ crontab -e
 ```
 
 Predict will now automatically update everyday at 2 AM.
+
+## 3. Chrony
+
+Chrony is used to maintain the system clock up-to-date for better precision  with Predict.
+
+To install Chrony, open a terminal and type :
+```
+sudo apt install chrony
+```
+
+To verify the status of chrony, use:
+```
+sudo systemctl status chronyd
+```
+
+If chronyd is inactive, you can start it with:
+```
+sudo systemctl start chronyd
+```
+
+To make sure chronyd starts at boot, type:
+```
+sudo systemctl enable chronyd
+```
