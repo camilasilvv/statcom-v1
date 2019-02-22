@@ -32,7 +32,7 @@ class Satellite():
         dict = {
             'name':self.name,
             'upFreq':self.upFreq,
-            'downFreq:' : self.downFreq,
+            'downFreq' : self.downFreq,
             'upBand': self.upBand,
             'downBand':self.downBand,
             'owner':self.owner,

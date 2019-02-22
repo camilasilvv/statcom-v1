@@ -1,1 +1,1 @@
-[]
+[{"name": "FOX-1D", "upFreq": "435", "downFreq": "144", "upBand": "UHF", "downBand": "VHF", "owner": "DS", "modulation": "ASD"}, {"name": "ISS", "upFreq": "146", "downFreq": "432", "upBand": "UHF", "downBand": "VHF", "owner": "DED", "modulation": "SDA"}, {"name": "NOAA18", "upFreq": "158", "downFreq": "452", "upBand": "UHF", "downBand": "VHF", "owner": "DS", "modulation": "SD"}]
