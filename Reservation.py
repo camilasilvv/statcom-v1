@@ -8,13 +8,14 @@ import time, sched
 
 class Reservation:
 
-    def __init__(self, satellite, reservationTime, length, client, data):
+    def __init__(self, satellite, reservationTime, length, client, data, frequencies):
         self.satellite = satellite
         self.reservationTime = reservationTime
         self.client=client
         # TOdO: add entry box for data
         self.length=length
         self.data = data
+        self.frequencies=frequencies
 
     def saveInDB(self):
 
@@ -38,6 +39,8 @@ class Reservation:
             'client': self.client,
             'length': self.length,
             'command file': self.data,
+            'Uplink': self.frequencies[0],
+            'Downlink': self.frequencies[1]
           # TODO : modify userWindow.py
         }
 
