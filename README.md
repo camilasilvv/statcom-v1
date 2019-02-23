@@ -1,14 +1,21 @@
 # statcom-v1
 
+Statcom-v1 is a user interface for using the ground station of PolyOrbit. It allows users to 
+set up appointement for satellite pass and to automatically track a satellite with the use of 
+Predict and GPredict.
 
-## 1. Packages
+...
+
+## Computer Setup
+
+### 1. Packages
 
 Here's the list of package to install:
 
 1. pyhton3-tkinter
 2. python
 
-## 2. Update TLE
+### 2. Update TLE
 
 Here's the instruction to update the TLE information:
 
@@ -42,7 +49,7 @@ crontab -e
 
 Predict will now automatically update everyday at 2 AM.
 
-## 3. Chrony
+### 3. Chrony
 
 Chrony is used to maintain the system clock up-to-date for better precision  with Predict.
 
