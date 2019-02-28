@@ -150,6 +150,7 @@ class NewReservationPage:
         # window creation
         self.master = master
         self.timeList=[]
+        self.timeListUTC=[]
         self.lenghtList=[]
         self.frequencies=[]
         self.master.title("new reservation")
@@ -215,7 +216,7 @@ class NewReservationPage:
             for i in range(len(self.availableList.curselection())):
                 print(selection[i])
                 print(self.timeList[selection[i]])
-                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(),frequencies=self.frequencies )
+                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(), frequencies=self.frequencies, timeUTC=self.timeListUTC[selection[i]] )
                 reservation.saveInDB()
             self.master.destroy()
     '''
@@ -257,6 +258,7 @@ class NewReservationPage:
                 for i in range(5):
                     nextPass=self.getPassages(nextTime)
                     print(nextPass)
+                    self.timeListUTC.append(nextPass[0])
                     self.timeList.append( time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0]))))
                     self.lenghtList.append(int(nextPass[1])-int(nextPass[0]))
                     self.availableList.insert(END, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0])))+'->'+str(int(nextPass[1])-int(nextPass[0])))
