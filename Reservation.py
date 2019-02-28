@@ -10,7 +10,7 @@ class Reservation:
 
 
 
-    def __init__(self, satellite, reservationTime, setUpTime, length, client, data):
+    def __init__(self, satellite, reservationTime, setUpTime, length, client, data, timeUTC):
 
         self.satellite = satellite
         self.reservationTime = reservationTime
@@ -20,6 +20,7 @@ class Reservation:
         self.length=length
         self.data = data
         self.frequencies=frequencies
+        self.timeUTC=timeUTC
 
 
 
@@ -57,7 +58,8 @@ class Reservation:
             'length': self.length,
             'command file': self.data,
             'Uplink': self.frequencies[0],
-            'Downlink': self.frequencies[1]
+            'Downlink': self.frequencies[1],
+            'Time UTC' :self.timeUTC
           # TODO : modify userWindow.py
         }
 
