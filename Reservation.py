@@ -10,12 +10,12 @@ class Reservation:
 
 
 
-    def __init__(self, satellite, reservationTime, setUpTime, length, client, data, timeUTC):
+    def __init__(self, satellite, reservationTime, frequencies, length, client, data, timeUTC):
 
         self.satellite = satellite
         self.reservationTime = reservationTime
-        self.setUpTime = setUpTime
-        self.setUpTime = reservationTime - 2*60
+
+        self.setUpTime = int(timeUTC) - 2*60
         self.client=client
         self.length=length
         self.data = data
@@ -72,17 +72,17 @@ class Reservation:
 
         with open('reservationDB.json', 'w') as resDB:
             resDB.write(jsonDB)
-
-            jsonDB.sort(key = lambda x: x['setUpTime'], reverse = True)
+'''
+            jsonDB.sort(key = lambda x: int(x['setUpTime']), reverse = True)
             for i in jsonDB['reservation']:
                 next = i+1
                 prev = i -1
-                if prev['reservationTime']+prev['length']+1 > i['setUpTime']:
+                if prev['reservationTime']+prev['length']+60 > i['setUpTime']:
                     #todo: delete reservation json
                     print('this reservation is impossible')
-                elif i['reservationTime']+i['length']+1 > next['setUpTime']:
+                elif i['reservationTime']+i['length']+60 > next['setUpTime']:
                     # todo: delete reservation json
                     print('this reservation is impossible')
                 else:
                     print('the reservations are okay')
-
+'''
