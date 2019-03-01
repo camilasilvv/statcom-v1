@@ -216,7 +216,7 @@ class NewReservationPage:
             for i in range(len(self.availableList.curselection())):
                 print(selection[i])
                 print(self.timeList[selection[i]])
-                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(), frequencies=self.frequencies, timeUTC=self.timeListUTC[selection[i]] )
+                reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(), frequencies=self.frequencies, timeUTC=int(self.timeListUTC[selection[i]]) )
                 reservation.saveInDB()
             self.master.destroy()
     '''
