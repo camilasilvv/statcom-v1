@@ -127,7 +127,7 @@ class NewSatellitePage:
                                               owner=owner, modulation=modulation)
                     sat.saveInDB()
                     #save the TLE in predict TLE
-                    TLEDB = open("/home/simon/.predict/predict.tle", 'a')
+                    TLEDB = open("/home/statcom/.predict/predict.tle", 'a')
                     newTLE= name+"\n"+self.boxTLE.get()+"\n"+self.boxTLE2.get()+'\n'
                     TLEDB.write(newTLE)
                     # quit the window without closing the program
@@ -389,7 +389,7 @@ class GetDataPage():
                 selection = self.dataList.curselection()
                 for i in selection:
 
-                    os.rename(self.downloadList[i], "/home/simon/Documents/"+self.downloadList[i].replace("/home/simon/Downloads/", ""))
+                    os.rename(self.downloadList[i], "/home/statcom/Documents/"+self.downloadList[i].replace("/home/statcom/Downloads/", ""))
                 self.master.destroy()
             else:
                 self.searchStatus.set('Database not found')
@@ -422,12 +422,34 @@ class ManageSatellite:
     def delete(self):
 
         previousJson = open("./satelliteDB.json")
+        predictTLEIn= open('/home/statcom/.predict/predict.tle','r')
+        predictTLEIn.seek(0)
+        finder = predictTLEIn.readlines()
+        predictTLEIn.close()
+        predictTLEOut=open('/home/statcom/.predict/predict.tle','w')
+
         satelliteList=[]
         satelliteList = json.load(previousJson)
         selection =self.listSatellite.curselection()
+
         for i in range(len(selection)):
+            deleteCheck=False
+            inx=0
+            for line in finder:
+                if line!=(satelliteList[selection[i]]['name']+'\n') and not deleteCheck:
+                    predictTLEOut.write(line)
+                elif inx<2:
+                    deleteCheck=True
+                    inx = inx + 1
+
+                elif inx >= 2:
+                    inx=0
+                    deleteCheck=False
+
             satelliteList.pop(selection[i])
             self.listSatellite.delete(selection[i])
+            #print(satelliteList[selection[i]]['name'])
+        predictTLEOut.close()
 
         jsonDB = json.dumps(satelliteList)
         with open('satelliteDB.json', 'w') as satDB:
