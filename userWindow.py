@@ -265,7 +265,6 @@ class NewReservationPage:
                     nextTime=str(int(nextPass[1])+30)
 
 
-            # TODO : print the time of reservation available(5) in the listbox (with predict)
         else:
             self.searchStatus.set("database not found")
 
@@ -384,7 +383,6 @@ class GetDataPage():
                     self.dataList.insert(END, i["mission"]+" - " +i['date'])
                     self.downloadList.append(i["file name"])
 
-            # TODO: print the file names available for download
         else:
             self.searchStatus.set("database not found")
 

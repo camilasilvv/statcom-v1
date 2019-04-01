@@ -44,7 +44,7 @@ class Reservation:
             previousJson = open("./reservationDB.json", "w")
         if os.stat("./reservationDB.json").st_size == 0:
             reservationList = []
-            
+
         else:
             reservationList = json.load(previousJson)
         print(type(reservationList))
