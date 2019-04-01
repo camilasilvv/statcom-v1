@@ -3,6 +3,7 @@ from tkinter import messagebox
 import satellite
 import Reservation
 from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askdirectory
 # from PIL import ImageTk, Image
 import json
 import time
@@ -214,8 +215,7 @@ class NewReservationPage:
             self.searchStatus.set("All field must be filled!")
         else:
             for i in range(len(self.availableList.curselection())):
-                print(selection[i])
-                print(self.timeList[selection[i]])
+
                 reservation=Reservation.Reservation(satellite=self.boxSatellite.get(), reservationTime = self.timeList[selection[i]],length=self.lenghtList[selection[i]], client ="polyorbite", data=self.boxCommandName.get(), frequencies=self.frequencies, timeUTC=int(self.timeListUTC[selection[i]]) )
                 reservation.saveInDB()
             self.master.destroy()
@@ -246,7 +246,7 @@ class NewReservationPage:
                     self.searchStatus.set('satellite found')
                     self.frequencies.append(i['upFreq'])
                     self.frequencies.append(i['downFreq'])
-                    print("satellite found")
+
                     found =True
 
             # print the next passages if the satellite is found
@@ -257,13 +257,13 @@ class NewReservationPage:
 
                 for i in range(5):
                     nextPass=self.getPassages(nextTime)
-                    print(nextPass)
+
                     self.timeListUTC.append(nextPass[0])
                     self.timeList.append( time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0]))))
                     self.lenghtList.append(int(nextPass[1])-int(nextPass[0]))
                     self.availableList.insert(END, time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(nextPass[0])))+'->'+str(int(nextPass[1])-int(nextPass[0])))
                     nextTime=str(int(nextPass[1])+30)
-                    print(nextTime)
+
 
             # TODO : print the time of reservation available(5) in the listbox (with predict)
         else:
@@ -327,17 +327,32 @@ class GetDataPage():
         self.btnDownload=Button(self.master,text="Download",width=15, command=self.downloadData)
         self.downloadList=[]
 
+        # creates widgets to ask the drectory name
+        self.labelDirectory = Label(self.master, text="Directory target")
+
+        self.btnDirectory = Button(self.master, text="browse target directory", command=self.getDirectory, width=18)
+        self.directoryName= StringVar()
+        self.boxTarget = Entry(self.master, textvariable=self.directoryName)
+
         # place the widget in the frame
 
         self.labelTitle.grid(row=0, column=1)
-        self.labelAvailable.grid(row=3, column=1)
+        self.labelAvailable.grid(row=4, column=1)
         self.labelSatName.grid(row=1, column=0)
         self.boxSatellite.grid(row=1, column=1)
         self.btnSearch.grid(row=1, column=2)
         self.labelStatus.grid(row=2,column=1)
-        self.dataList.grid(row=4,column=1)
-        self.btnDownload.grid(row=5,column=1)
+        self.labelDirectory.grid(row=3, column=0)
+        self.boxTarget.grid(row=3,column =1)
+        self.btnDirectory.grid(row=3, column=2)
+        self.dataList.grid(row=5,column=1)
+        self.btnDownload.grid(row=6,column=1)
 
+    def getDirectory(self):
+
+        dir = askdirectory(initialdir="../../../Documents", title="Choose a directory.")
+
+        self.directoryName.set(dir)
 
     '''
      ---------------------------------------------------------
@@ -353,10 +368,10 @@ class GetDataPage():
         found = False
 
         # verify if the satellite is in the database
-        if os.path.isfile('./dataDB'):
+        if os.path.isfile('./dataDB.json'):
 
             # convert the json file to a python list
-            jsonSat = open("dataDB")
+            jsonSat = open("dataDB.json")
             DataList = json.load(jsonSat)
 
 
@@ -364,7 +379,7 @@ class GetDataPage():
             for i in DataList:
                 if i["satellite"] == self.boxSatellite.get():
                     self.searchStatus.set('satellite found')
-                    print("satellite found")
+
                     found = True
                     self.dataList.insert(END, i["mission"]+" - " +i['date'])
                     self.downloadList.append(i["file name"])
@@ -373,26 +388,47 @@ class GetDataPage():
         else:
             self.searchStatus.set("database not found")
 
+    '''
+        ---------------------------------------------------------
+       description: This function searches the satellite in the database
+       and print out the next passages in the listbox widget
+
+       create by: Simon Belanger 
+       Last mmodified by : Simon Belanger @2019-01-24
+        ---------------------------------------------------------
+       '''
     def downloadData(self):
 
         # verify if the satellite is in the database
         selection = self.dataList.curselection()
         if len(selection)==0:
             self.searchStatus.set("choose a file")
+        elif self.boxTarget.get()=="":
+            self.searchStatus.set('choose a directory')
         else:
-            if os.path.isfile('./dataDB'):
+            if os.path.isfile('./dataDB.json'):
 
                 # convert the json file to a python list
-                jsonSat = open("dataDB")
+                jsonSat = open("dataDB.json",'r')
                 DataList = json.load(jsonSat)
 
                 selection = self.dataList.curselection()
                 for i in selection:
 
-                    os.rename(self.downloadList[i], "/home/statcom/Documents/"+self.downloadList[i].replace("/home/statcom/Downloads/", ""))
+                    os.rename(self.downloadList[i], self.boxTarget.get()+self.downloadList[i].replace("/home/statcom/Documents/Statcom_BackProcess/DATA", ""))
+
+                    DataList.pop(selection[i])
+
+
+                jsonDB = json.dumps(DataList)
+                with open('dataDB.json', 'w') as dataDB:
+                    dataDB.write(jsonDB)
+
                 self.master.destroy()
             else:
                 self.searchStatus.set('Database not found')
+
+
 
 
 
@@ -448,7 +484,7 @@ class ManageSatellite:
 
             satelliteList.pop(selection[i])
             self.listSatellite.delete(selection[i])
-            #print(satelliteList[selection[i]]['name'])
+
         predictTLEOut.close()
 
         jsonDB = json.dumps(satelliteList)
@@ -471,7 +507,7 @@ class ManageSatellite:
             # convert the json file to a python list
             jsonFile=open("./satelliteDB.json")
             allSatellites=json.load(jsonFile)
-            print(allSatellites[0])
+
             for i in allSatellites:
                 self.listSatellite.insert(END,i["name"])
         else:
@@ -561,23 +597,23 @@ class ManageData:
     ---------------------------------------------------------
    '''
     def printData(self):
-        jsonFile = open("./dataDB",)
+        jsonFile = open("./dataDB.json",)
         allData= json.load(jsonFile)
         for i in allData:
             self.listData.insert(END, i["mission"]+" - "+i['date'])
 
     def delete(self):
 
-        previousJson = open("./dataDB")
+        previousJson = open("./dataDB.json")
 
         dataList = json.load(previousJson)
         selection =self.listData.curselection()
         for i in range(len(selection)):
-            dataListList.pop(selection[i])
+            dataList.pop(selection[i])
             self.listData.delete(selection[i])
 
         jsonDB = json.dumps(dataList)
-        with open('dataDB', 'w') as dataDB:
+        with open('dataDB.json', 'w') as dataDB:
             dataDB.write(jsonDB)
 
 
